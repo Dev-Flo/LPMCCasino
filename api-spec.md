@@ -18,22 +18,38 @@ of implementation between client and server.
     blackslash (\\).
     - These blocks are case insentitive, but good practices calls for all lower case
 
-Example:
-
-    ||userinfo::user:locke|email:locke@uga.edu|currency:dollar|money:500||
-
 ##Full Specification
 This API is primarily a way for clients to issue commands and receive information from the server. The syntax
-of return statements and requests are the same, with different components being sent and received. To be able to 
-use the API, the client must first login with a username and a password. From there, the server will issue a sessid, 
-which must be included in every call.
+of return statements and requests are the same, with different components being sent and received.
+
+###Handshake protocol
+In order to send and receive messages properly, two identifying pieces of information must be passed with every
+API call, depending on which call it is. 
+
+All calls must have:
+messID - This is a client issued message identifier used to find returned messages on the stack, that will be sent
+with the server's response to a client message.
+
+When issuing commands before a user has logged in, a call must have:
+clientID - This is a client issued name that the server can use to identify an incoming client. The server will
+reject a clientID if it is identical to one currently in use, and will close the socket connection.
+
+When issuing commands after a user has logged in, a call must have:
+sessID - This is a server issued identifier for a user, used to validate that they have logged in properly. 
+
+
 
 ###General Syntax Template
     ||<NameOfInfo>::<Component1>:<Info>|<Component2>:<Info>|...|<ComponentN>:<Info>||
+    
+####Examples
+    
 
 ###Administrative Blocks
 ####Component Descriptions
-    - sessid: A client's session id
+    - clientID: A single client's unique ID
+    - sessID: A user's unique session ID 
+    - messID: A message's unique ID
     - user: A user's full username
     - pass: A user's full password
     - email: A user's full email
@@ -50,36 +66,32 @@ which must be included in every call.
 Email - Returns a user's email
 
     Name: email
-    Components: sessid, user
-    Returns: email
-    Syntax: ||email::sessid:<sessionid>|user:<username>||
+    Components: sessID, messID, user
+    Returns: sessID, messID, email
 
 Status: NOT STARTED
 
 Currency - Returns a user's currency
 
     Name: currency
-    Components: sessid, user
-    Returns: currency
-    Syntax: ||currency::sessid:<sessionid>|user:<username>||
+    Components: sessID, messID, user
+    Returns: sessID, messID, currency
 
 Status: NOT STARTED
 
 Money - Returns the amount of money the user has
 
     Name: money
-    Components: sessid, user
-    Returns: money
-    Syntax: ||money::sessid:<sessionid>|user:<username>||
+    Components: sessID, messID, user
+    Returns: sessID, messID, money
 
 Status: NOT STARTED
 
 User Information - Returns a block of user information
 
     Name: userinfo
-    Components: sessid, user
-    Returns: email, currency, money
-    Syntax: ||userinfo::sessid:<sessionid>|user:<username>||
+    Components: sessID, messID, user
+    Returns: sessID, messID, email, currency, money
 
 Status: NOT STARTED
 
@@ -87,9 +99,8 @@ Status: NOT STARTED
 Change - Modifies a user's account information.
 
     Name: change
-    Components: sessid, target, old, new
-    Returns: bool
-    Syntax: ||change::sessid:<sessionid>|target:<target>|old:<oldvalue>|new:<newvalue>||
+    Components: sessID, messID, target, old, new
+    Returns: sessID, messID, bool
 
 Status: NOT STARTED
 
@@ -97,36 +108,32 @@ Status: NOT STARTED
 Login - Validates a user logging in.
 
     Name: login
-    Components: user, pass
-    Returns: sessid
-    Syntax: ||login::user:<username>|pass:<password>||
+    Components: clientID, messID, user, pass
+    Returns: messID, sessID
 
 Status: NOT STARTED
 
 Logout - Ends a users session.
 
     Name: logout
-    Compnents: user
-    Returns: bool
-    Syntax: ||logout::sessid:<sessionid>||
+    Compnents: messID, sessID
+    Returns: messID, bool
 
 Status: NOT STARTED
 
 Create New Account - Creates a new user account.
 
     Name: createacc
-    Components: user, pass, email, currency
-    Returns: sessid
-    Syntax: ||createacc::user:<username>|pass:<password>|email:<email>|currency:<currency>||
+    Components: clientID, messID, user, pass, email, currency
+    Returns: messID, sessID
 
 Status: NOT STARTED
 
 Recover Account Information - Sends a user their username and reset their password
 
     Name: recover
-    Components: email
-    Returns: bool
-    Syntax: ||recover::email:<email>||
+    Components: clientID, messID, email
+    Returns: messID, bool
 
 Status: NOT STARTED
 
