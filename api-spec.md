@@ -37,7 +37,8 @@ reject a clientID if it is identical to one currently in use, and will close the
 When issuing commands after a user has logged in, a call must have:
 sessID - This is a server issued identifier for a user, used to validate that they have logged in properly. 
 
-
+Upon initial connection, the first message sent to the server must be the handshake function, otherwise the connection
+will close.
 
 ###General Syntax Template
     ||<NameOfInfo>::<Component1>:<Info>|<Component2>:<Info>|...|<ComponentN>:<Info>||
@@ -105,6 +106,12 @@ Change - Modifies a user's account information.
 Status: NOT STARTED
 
 ####Functions
+Handshake - Validates a client's clientID for uniqness. *This function must be called before any communication
+is done*
+    Name: handshake
+    Components: clientID, messID
+    Returns: messID, bool
+
 Login - Validates a user logging in.
 
     Name: login
